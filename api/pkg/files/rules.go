@@ -1,8 +1,13 @@
-package git
+package files
 
 import (
 	"path/filepath"
 	"strings"
+)
+
+const (
+	// 100 KB
+	MaxFileSize = 100 * 1024
 )
 
 var (
@@ -65,7 +70,8 @@ var (
 		".min.js",
 		".min.map",
 		"package.json",
-		"-lock.json",
+		"lock.json",
+		".lock",
 	}
 	blacklistDirs = []string{
 		"node_modules",
@@ -73,6 +79,7 @@ var (
 		"dist",
 		"public",
 		"mocks",
+		"third_party",
 	}
 	blacklistPrefixes = []string{
 		// Everything that starts with a dot
@@ -118,16 +125,18 @@ func IsAllowedFile(path string) bool {
 	return true
 }
 
-func IsAllowedDir(dir string) bool {
-	dir = strings.ToLower(dir)
+func IsAllowedDir(path string) bool {
+	parts := strings.Split(path, string(filepath.Separator))
 
-	if _, ok := blacklistDirsMap[dir]; ok {
-		return false
-	}
-
-	for _, prefix := range blacklistPrefixes {
-		if strings.HasPrefix(dir, prefix) {
+	for _, dir := range parts {
+		if _, ok := blacklistDirsMap[dir]; ok {
 			return false
+		}
+
+		for _, prefix := range blacklistPrefixes {
+			if strings.HasPrefix(dir, prefix) {
+				return false
+			}
 		}
 	}
 

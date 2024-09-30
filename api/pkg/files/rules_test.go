@@ -1,4 +1,4 @@
-package git
+package files
 
 import (
 	"testing"

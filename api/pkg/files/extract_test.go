@@ -1,0 +1,32 @@
+package files
+
+import (
+	"os"
+	"testing"
+)
+
+func TestExtractAndFilterFiles(t *testing.T) {
+	tests := []struct {
+		path     string
+		isNilErr bool
+		files    int64
+	}{
+		{"notfound.tar.gz", false, 0},
+		{"./testdata/formulosity-0.1.5.tar.gz", false, 90},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.path, func(t *testing.T) {
+			res, err := ExtractAndFilterFiles(tt.path)
+			if res != nil {
+				os.RemoveAll(res.OutputDir)
+			}
+			if tt.isNilErr && err != nil {
+				t.Errorf("expecting nil error, got %v", err)
+			}
+			if err == nil && res.Files != tt.files {
+				t.Errorf("expecting %d files, got %d", tt.files, res.Files)
+			}
+		})
+	}
+}

@@ -3,7 +3,10 @@ package git
 import (
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/google/go-github/v65/github"
@@ -13,11 +16,6 @@ import (
 type Client struct {
 	client   *github.Client
 	reposDir string
-}
-
-type GetContentsResult struct {
-	Files int64
-	Dirs  int64
 }
 
 func NewClient(accessToken string) *Client {
@@ -72,7 +70,12 @@ func (c *Client) GetOrgRepos(org string) ([]*github.Repository, error) {
 	return repos, nil
 }
 
-func (c *Client) DownloadRepo(owner string, repo string, ref string) (*GetContentsResult, error) {
+type DownloadRepoResult struct {
+	Ref        string
+	OutputFile string
+}
+
+func (c *Client) DownloadRepo(owner string, repo string, ref string) (*DownloadRepoResult, error) {
 	logCtx := log.With("owner", owner, "repo", repo)
 
 	// Get latest commit if ref is empty
@@ -86,16 +89,61 @@ func (c *Client) DownloadRepo(owner string, repo string, ref string) (*GetConten
 	}
 
 	logCtx = logCtx.With("ref", ref)
-	logCtx.Info("downloading repo")
 
-	res, err := c.getContents(owner, repo, ref, "")
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	logCtx.Info("getting archive url")
+	opts := &github.RepositoryContentGetOptions{}
+	opts.Ref = ref
+	url, _, err := c.client.Repositories.GetArchiveLink(ctx, owner, repo, github.Tarball, opts, 1)
+	if err != nil {
+		logCtx.WithError(err).Error("failed to get archive link")
+		return nil, err
+	}
+	logCtx.With("url", url.String())
+
+	outputFile := filepath.Join(c.reposDir, owner, repo, ref+".tar.gz")
+	// Create output directory
+	if err := os.MkdirAll(filepath.Dir(outputFile), 0755); err != nil {
+		logCtx.WithError(err).Error("failed to create output directory")
+		return nil, err
+	}
+
+	out, err := os.Create(outputFile)
+	if err != nil {
+		logCtx.WithError(err).Error("failed to create output file")
+		return nil, err
+	}
+	defer out.Close()
+
+	logCtx.Info("downloading archive")
+	client := http.Client{Timeout: 10 * time.Minute}
+	resp, err := client.Get(url.String())
 	if err != nil {
 		logCtx.WithError(err).Error("failed to download repo")
 		return nil, err
 	}
+	defer resp.Body.Close()
+
+	// Check server response
+	if resp.StatusCode != http.StatusOK {
+		logCtx.Errorf("non-200 response code: %d", resp.StatusCode)
+		return nil, fmt.Errorf("non-200 response code: %d", resp.StatusCode)
+	}
+
+	// Write the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		logCtx.WithError(err).Error("failed to write to file")
+		return nil, err
+	}
 
 	logCtx.Info("repo downloaded")
-	return res, nil
+	return &DownloadRepoResult{
+		Ref:        ref,
+		OutputFile: outputFile,
+	}, nil
 }
 
 func (c *Client) GetLatestCommitSHA(owner string, repo string) (string, error) {

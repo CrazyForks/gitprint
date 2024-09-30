@@ -1,11 +1,9 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/plutov/gitprint/api/pkg/git"
 	"github.com/plutov/gitprint/api/pkg/http/response"
 )
 
@@ -22,20 +20,6 @@ func (h *Handler) githubCallback(c echo.Context) error {
 	if err != nil {
 		return response.BadRequestDefaultMessage(c)
 	}
-
-	// TODO: move to another endpoint
-	ghClient := git.NewClient(token)
-	// orgs, _ := ghClient.GetUserOrgs()
-	// fmt.Println(orgs)
-
-	// repos, _ := ghClient.GetUserRepos()
-	// fmt.Println(repos)
-
-	// repos, _ = ghClient.GetOrgRepos("12traits")
-	// fmt.Println(repos)
-
-	res, _ := ghClient.DownloadRepo("ansible", "awx-operator", "")
-	fmt.Println(res)
 
 	return response.Ok(c, token)
 }
