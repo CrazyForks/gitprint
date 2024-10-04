@@ -80,6 +80,7 @@ var (
 		"public",
 		"mocks",
 		"third_party",
+		"testdata",
 	}
 	blacklistPrefixes = []string{
 		// Everything that starts with a dot

@@ -4,8 +4,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    env:
-      CGO_ENABLED: 0
     steps:
       - name: Install Go
         uses: actions/setup-go@v5
@@ -19,12 +17,11 @@ jobs:
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.60
+          working-directory: ./api
 
   test:
     name: Tests
     runs-on: ubuntu-latest
-    env:
-      CGO_ENABLED: 0
     steps:
       - name: Install Go
         uses: actions/setup-go@v5

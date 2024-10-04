@@ -3,10 +3,16 @@ package files
 import (
 	"archive/tar"
 	"compress/gzip"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/plutov/gitprint/api/pkg/log"
 )
@@ -27,6 +33,11 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 	}
 	defer r.Close()
 
+	// delete the archive file after processing, but do not remove testdata files
+	if !strings.HasPrefix(path, ".testdata/") {
+		defer os.RemoveAll(path)
+	}
+
 	gzr, err := gzip.NewReader(r)
 	if err != nil {
 		logCtx.WithError(err).Error("failed to create gzip reader")
@@ -35,7 +46,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 	defer gzr.Close()
 
 	res := &ExtractAndFilterResult{
-		OutputDir: strings.Replace(path, ".tar.gz", "", 1),
+		OutputDir: filepath.Join(os.Getenv("GITHUB_REPOS_DIR"), getRandomOutputDir()),
 	}
 	// remove output dir if exists
 	os.RemoveAll(res.OutputDir)
@@ -48,6 +59,10 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 		// if no more files are found return
 		case err == io.EOF:
 			logCtx.With("res", *res).Info("extracted and filtered files")
+			if res.Files == 0 {
+				os.RemoveAll(res.OutputDir)
+				return nil, fmt.Errorf("no files found in the archive")
+			}
 			return res, nil
 
 		// return any other error
@@ -76,6 +91,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 			if header.Size == 0 || header.Size > MaxFileSize {
 				continue
 			}
+			// skip blacklisted dirs
 			headerDir := filepath.Dir(header.Name)
 			if headerDir != "." && !IsAllowedDir(headerDir) {
 				continue
@@ -98,6 +114,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 			}
 
 			if _, err := io.Copy(f, tr); err != nil {
+				f.Close()
 				logCtx.WithError(err).Error("failed to copy file contents")
 				return nil, err
 			}
@@ -106,4 +123,18 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 			res.Files++
 		}
 	}
+}
+
+func getRandomOutputDir() string {
+	timestamp := time.Now().UnixNano()
+
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		log.WithError(err).Error("unable to generate random bytes")
+		return fmt.Sprintf("%x", sha256.Sum256([]byte(strconv.Itoa(int(timestamp)))))
+	}
+
+	salt := base64.URLEncoding.EncodeToString(b)
+
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(salt+strconv.Itoa(int(timestamp)))))
 }

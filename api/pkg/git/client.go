@@ -80,15 +80,30 @@ func (c *Client) GetOrgRepos(org string) ([]*github.Repository, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	log.Info("getting user repos")
+	log.Info("getting org repos")
 
 	repos, _, err := c.client.Repositories.ListByOrg(ctx, org, nil)
 	if err != nil {
-		log.WithError(err).Error("failed to get user orgs")
+		log.WithError(err).Error("failed to get org repos")
 		return nil, err
 	}
 
 	return repos, nil
+}
+
+func (c *Client) GetRepo(owner string, repo string) (*github.Repository, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	log.Info("getting repo")
+
+	repository, _, err := c.client.Repositories.Get(ctx, owner, repo)
+	if err != nil {
+		log.WithError(err).Error("failed to get repo")
+		return nil, err
+	}
+
+	return repository, nil
 }
 
 type DownloadRepoResult struct {
