@@ -60,6 +60,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 		case err == io.EOF:
 			logCtx.With("res", *res).Info("extracted and filtered files")
 			if res.Files == 0 {
+				// remove output dir if no files found
 				os.RemoveAll(res.OutputDir)
 				return nil, fmt.Errorf("no files found in the archive")
 			}
