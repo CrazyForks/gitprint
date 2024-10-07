@@ -24,3 +24,11 @@ Flow:
 Download repo contents flow:
 
 - Downlaod all contents of the repo into owner/repo/ref/...
+
+Pre Release TODO:
+- Logo, Favicon and OG Image
+- 3 top examples to download: Neovim...
+
+Post Release TODO:
+- global IP rate limit
+- per user download/generate rate limit

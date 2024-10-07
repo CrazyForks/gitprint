@@ -9,6 +9,10 @@ body {
     font-family: monospace;
 }
 
+a {
+    @apply text-teal-500 hover:text-teal-600;
+}
+
 @layer utilities {
     .text-balance {
         text-wrap: balance;
