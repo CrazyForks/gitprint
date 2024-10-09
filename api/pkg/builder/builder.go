@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v65/github"
+	"github.com/plutov/gitprint/api/pkg/files"
 	"github.com/plutov/gitprint/api/pkg/log"
 )
 
@@ -17,6 +18,12 @@ const (
 	NodeTypeFile         = "file"
 )
 
+type Contributor struct {
+	Username      string `json:"username"`
+	AvatarURL     string `json:"avatarURL"`
+	Contributions int    `json:"contributions"`
+}
+
 type ContentMeta struct {
 	FullName        string `json:"fullName"`
 	Description     string `json:"description"`
@@ -24,12 +31,6 @@ type ContentMeta struct {
 	StargazersCount int    `json:"stargazersCount"`
 	License         string `json:"license"`
 	Ref             string `json:"ref"`
-}
-
-type Contributor struct {
-	Username      string `json:"username"`
-	AvatarURL     string `json:"avatarURL"`
-	Contributions int    `json:"contributions"`
 }
 
 type ContentContributors struct {
@@ -47,16 +48,20 @@ type ContentFile struct {
 }
 
 type DocumentNode struct {
-	Type    string      `json:"type"`
-	Title   string      `json:"title"`
-	Content interface{} `json:"content"`
+	Type                string               `json:"type"`
+	Title               string               `json:"title"`
+	ContentMeta         *ContentMeta         `json:"contentMeta,omitempty"`
+	ContentContributors *ContentContributors `json:"contentContributors,omitempty"`
+	ContentChapter      *ContentChapter      `json:"contentChapter,omitempty"`
+	ContentFile         *ContentFile         `json:"contentFile,omitempty"`
 }
 
 type Document struct {
 	Nodes []DocumentNode
 }
 
-func GenerateDocument(repo *github.Repository, contributors []*github.Contributor, ref string, outputDir string) (*Document, error) {
+func GenerateDocument(repo *github.Repository, contributors []*github.Contributor, ref string, exportID string) (*Document, error) {
+	outputDir := files.GetExportDir(exportID)
 	logCtx := log.With("repo", repo.GetFullName(), "outputDir", outputDir)
 	logCtx.Info("generating document")
 
@@ -66,7 +71,7 @@ func GenerateDocument(repo *github.Repository, contributors []*github.Contributo
 	doc.Nodes = append(doc.Nodes, DocumentNode{
 		Type:  NodeTypeMeta,
 		Title: repo.GetFullName(),
-		Content: ContentMeta{
+		ContentMeta: &ContentMeta{
 			FullName:        repo.GetFullName(),
 			Description:     repo.GetDescription(),
 			ForksCount:      repo.GetForksCount(),
@@ -87,7 +92,7 @@ func GenerateDocument(repo *github.Repository, contributors []*github.Contributo
 	doc.Nodes = append(doc.Nodes, DocumentNode{
 		Type:  NodeTypeContributors,
 		Title: "Top Contributors",
-		Content: ContentContributors{
+		ContentContributors: &ContentContributors{
 			Contributors: contributorsList,
 		},
 	})
@@ -130,7 +135,7 @@ func GenerateDocument(repo *github.Repository, contributors []*github.Contributo
 			doc.Nodes = append(doc.Nodes, DocumentNode{
 				Type:  NodeTypeChapter,
 				Title: title,
-				Content: ContentChapter{
+				ContentChapter: &ContentChapter{
 					VersionMajor: versionMajor,
 					VersionMinor: versionMinor,
 					VersionPatch: versionPatch,
@@ -149,7 +154,7 @@ func GenerateDocument(repo *github.Repository, contributors []*github.Contributo
 			node := DocumentNode{
 				Type:  NodeTypeFile,
 				Title: path,
-				Content: ContentFile{
+				ContentFile: &ContentFile{
 					Content: f,
 				},
 			}

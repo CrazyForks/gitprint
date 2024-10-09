@@ -21,6 +21,7 @@ func NewRouter(h *Handler) *echo.Echo {
 	e.GET("/", h.healthCheckHandler)
 	e.GET("/github/auth/url", h.githubURL)
 	e.GET("/github/auth/callback", h.githubCallback)
+	e.GET("/files", h.downloadExportFile)
 
 	// restricted endpoints
 	e.Use(h.authMiddleware)

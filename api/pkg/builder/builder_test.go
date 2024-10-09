@@ -1,12 +1,15 @@
 package builder
 
 import (
+	"os"
 	"testing"
 
 	"github.com/google/go-github/v65/github"
 )
 
 func TestGenerateDocument(t *testing.T) {
+	os.Setenv("GITHUB_REPOS_DIR", "./testdata")
+
 	repo := &github.Repository{
 		FullName:        github.String("testdata/testrepo"),
 		Description:     github.String("test description"),
@@ -27,19 +30,19 @@ func TestGenerateDocument(t *testing.T) {
 	tests := []struct {
 		repository    *github.Repository
 		contributors  []*github.Contributor
-		outputDir     string
+		exportID      string
 		isNilErr      bool
 		nodesCount    int
 		chaptersCount int
 		rootReadme    bool
 	}{
 		{repo, contributors, "notfound", false, 0, 0, false},
-		{repo, contributors, "./testdata/testrepo", true, 19, 3, true},
+		{repo, contributors, "testrepo", true, 19, 3, true},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.outputDir, func(t *testing.T) {
-			doc, err := GenerateDocument(tt.repository, tt.contributors, "a4d5gq", tt.outputDir)
+		t.Run(tt.exportID, func(t *testing.T) {
+			doc, err := GenerateDocument(tt.repository, tt.contributors, "a4d5gq", tt.exportID)
 			if tt.isNilErr && err != nil {
 				t.Errorf("expecting nil error, got %v", err)
 			}
@@ -53,7 +56,7 @@ func TestGenerateDocument(t *testing.T) {
 					if node.Type == NodeTypeChapter {
 						// validate root chapter
 						if chaptersCount == 0 {
-							content := node.Content.(ContentChapter)
+							content := node.ContentChapter
 							if node.Title != "root" {
 								t.Errorf("expecting root title, got %s", node.Title)
 							}

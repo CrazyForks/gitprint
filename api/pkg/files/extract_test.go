@@ -12,19 +12,19 @@ func TestExtractAndFilterFiles(t *testing.T) {
 		files    int
 	}{
 		{"notfound.tar.gz", false, 0},
-		{"./testdata/formulosity-0.1.5.tar.gz", false, 90},
+		{"./testdata/formulosity-0.1.5.tar.gz", true, 90},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.path, func(t *testing.T) {
 			res, err := ExtractAndFilterFiles(tt.path)
 			if res != nil {
-				os.RemoveAll(res.OutputDir)
+				os.RemoveAll(res.outputDir)
 			}
 			if tt.isNilErr && err != nil {
 				t.Errorf("expecting nil error, got %v", err)
 			}
-			if err == nil && res.Files != tt.files {
+			if tt.isNilErr == true && res.Files != tt.files {
 				t.Errorf("expecting %d files, got %d", tt.files, res.Files)
 			}
 		})

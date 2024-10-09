@@ -90,7 +90,7 @@ func (h *Handler) generate(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return response.BadRequest(c, "invalid request")
 	}
-	outputDir := c.QueryParam("output_dir")
+	exportID := c.QueryParam("export_id")
 
 	user := c.Get("user").(*git.User)
 	ghClient := git.NewClient(user.AccessToken)
@@ -113,7 +113,7 @@ func (h *Handler) generate(c echo.Context) error {
 		}
 	}
 
-	doc, err := builder.GenerateDocument(repository, contributors, req.Ref, outputDir)
+	doc, err := builder.GenerateDocument(repository, contributors, req.Ref, exportID)
 	if err != nil {
 		return response.InternalError(c, "unable to generate document")
 	}

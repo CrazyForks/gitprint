@@ -18,8 +18,9 @@ import (
 )
 
 type ExtractAndFilterResult struct {
-	Files     int
-	OutputDir string
+	Files     int    `json:"files"`
+	outputDir string `json:"-"`
+	ExportID  string `json:"exportID"`
 }
 
 func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
@@ -34,7 +35,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 	defer r.Close()
 
 	// delete the archive file after processing, but do not remove testdata files
-	if !strings.HasPrefix(path, ".testdata/") {
+	if !strings.HasPrefix(path, "./testdata/") {
 		defer os.RemoveAll(path)
 	}
 
@@ -45,11 +46,11 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 	}
 	defer gzr.Close()
 
+	exportID := getRandomOutputDir()
 	res := &ExtractAndFilterResult{
-		OutputDir: filepath.Join(os.Getenv("GITHUB_REPOS_DIR"), getRandomOutputDir()),
+		outputDir: GetExportDir(exportID),
+		ExportID:  exportID,
 	}
-	// remove output dir if exists
-	os.RemoveAll(res.OutputDir)
 
 	tr := tar.NewReader(gzr)
 	for {
@@ -60,8 +61,6 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 		case err == io.EOF:
 			logCtx.With("res", *res).Info("extracted and filtered files")
 			if res.Files == 0 {
-				// remove output dir if no files found
-				os.RemoveAll(res.OutputDir)
 				return nil, fmt.Errorf("no files found in the archive")
 			}
 			return res, nil
@@ -83,7 +82,7 @@ func ExtractAndFilterFiles(path string) (*ExtractAndFilterResult, error) {
 		if len(parts) > 0 {
 			header.Name = strings.Join(parts[1:], "/")
 		}
-		target := filepath.Join(res.OutputDir, header.Name)
+		target := filepath.Join(res.outputDir, header.Name)
 
 		// check the file type
 		switch header.Typeflag {
