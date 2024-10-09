@@ -19,7 +19,7 @@ export default function RootLayout({
             gitprint.me - Print your favorite Git repositories as PDF.
           </a>
         </header>
-        <main className="flex h-dvh flex-1 flex-col">{children}</main>
+        <main className="flex flex-col">{children}</main>
       </body>
     </html>
   );

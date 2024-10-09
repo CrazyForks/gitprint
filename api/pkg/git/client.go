@@ -46,51 +46,6 @@ func (c *Client) GetCurrentUser() (*User, error) {
 	}, nil
 }
 
-func (c *Client) GetUserOrgs() ([]*github.Organization, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	log.Info("getting user orgs")
-
-	orgs, _, err := c.client.Organizations.List(ctx, "", nil)
-	if err != nil {
-		log.WithError(err).Error("failed to get user orgs")
-		return nil, err
-	}
-
-	return orgs, nil
-}
-
-func (c *Client) GetUserRepos() ([]*github.Repository, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	log.Info("getting user repos")
-
-	repos, _, err := c.client.Repositories.ListByAuthenticatedUser(ctx, nil)
-	if err != nil {
-		log.WithError(err).Error("failed to get user orgs")
-		return nil, err
-	}
-
-	return repos, nil
-}
-
-func (c *Client) GetOrgRepos(org string) ([]*github.Repository, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	log.Info("getting org repos")
-
-	repos, _, err := c.client.Repositories.ListByOrg(ctx, org, nil)
-	if err != nil {
-		log.WithError(err).Error("failed to get org repos")
-		return nil, err
-	}
-
-	return repos, nil
-}
-
 func (c *Client) GetTopContributors(owner string, repo string) ([]*github.Contributor, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

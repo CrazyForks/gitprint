@@ -29,7 +29,6 @@ export default function Home() {
             </p>
           </div>
         </div>
-        <div className="h-px w-full"></div>
       </div>
       <div className="pb-10">{Form()}</div>
       <div className="pb-10">
@@ -40,7 +39,7 @@ export default function Home() {
               Click to download the PDF
             </span>
           </div>
-          <div className="mb-4 grid grid-cols-2 gap-2 px-4 sm:px-0">
+          <div className="mb-4 grid grid-cols-2 gap-2 px-4">
             <a className="cursor-pointer rounded-md border p-4">
               <div className="text-sm font-semibold">neovim/neovim</div>
               <div className="text-sm text-white">v0.10.2</div>

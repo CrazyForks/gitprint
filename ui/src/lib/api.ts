@@ -45,7 +45,11 @@ export async function call(path: string, init?: RequestInit) {
 export async function post(path: string, payload: object) {
   const headers = {
     "Content-Type": "application/json",
+    Authorization: "",
   };
+  if (jwt) {
+    headers["Authorization"] = `Bearer ${jwt}`;
+  }
 
   return call(path, {
     method: "POST",
@@ -54,8 +58,14 @@ export async function post(path: string, payload: object) {
   });
 }
 
-export async function get(path: string) {
-  const headers = {};
+export async function get(path: string, jwt?: string) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: "",
+  };
+  if (jwt) {
+    headers["Authorization"] = `Bearer ${jwt}`;
+  }
 
   return call(path, {
     method: "GET",
@@ -64,5 +74,26 @@ export async function get(path: string) {
 }
 
 export async function getJWT(code: string, state: string) {
-  return await get(`/github/auth/callback?code=${code}&state=${state}`);
+  return await get(
+    `/github/auth/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+  );
+}
+
+export async function download(jwt: string, repo: string, ref: string) {
+  return await get(
+    `/private/github/repo/download?repo=${encodeURIComponent(repo)}&ref=${encodeURIComponent(ref)}`,
+    jwt,
+  );
+}
+
+export async function generate(
+  jwt: string,
+  repo: string,
+  ref: string,
+  exportId: string,
+) {
+  return await get(
+    `/private/github/repo/generate?repo=${encodeURIComponent(repo)}&ref=${encodeURIComponent(ref)}&export_id=${encodeURIComponent(exportId)}`,
+    jwt,
+  );
 }

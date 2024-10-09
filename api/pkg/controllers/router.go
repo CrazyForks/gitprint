@@ -26,8 +26,6 @@ func NewRouter(h *Handler) *echo.Echo {
 	// restricted endpoints
 	private := e.Group("/private")
 	private.Use(h.authMiddleware)
-	private.GET("/github/orgs", h.getOrgs)
-	private.GET("/github/repos", h.getRepos)
 	private.GET("/github/repo/download", h.downloadRepo)
 	private.GET("/github/repo/generate", h.generate)
 

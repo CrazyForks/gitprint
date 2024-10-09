@@ -3,12 +3,23 @@
 import { useEffect, useState } from "react";
 import { parseJwt } from "../lib/jwt";
 import { User } from "../lib/types";
+import { download, generate } from "../lib/api";
+
+enum ProgressStatus {
+  None = "none",
+  Downloading = "downloading",
+  Generating = "generating",
+  Done = "done",
+  Error = "error",
+}
 
 export default function Form() {
   const [user, setUser] = useState<User | undefined>();
   const [token, setToken] = useState<string | undefined>();
   const [repo, setRepo] = useState<string>("");
   const [ref, setRef] = useState<string>("");
+  const [progress, setProgress] = useState<ProgressStatus>(ProgressStatus.None);
+  const [log, setLog] = useState<Array<string>>([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -26,6 +37,34 @@ export default function Form() {
   function isValidRepo(repo: string) {
     const parts = repo.split("/");
     return parts.length === 2 && parts[0] && parts[1];
+  }
+
+  async function start() {
+    setProgress(ProgressStatus.Downloading);
+    setLog(["Downloading repository files..."]);
+
+    const res = await download(token as string, repo, ref);
+    if (res.error) {
+      setProgress(ProgressStatus.Error);
+      setLog((log) => [...log, "ERROR: " + res.error]);
+    } else {
+      setProgress(ProgressStatus.Generating);
+      setLog((log) => [...log, "DONE", "Generating PDF..."]);
+
+      const generateRes = await generate(
+        token as string,
+        repo,
+        ref,
+        res.data.exportID,
+      );
+      if (generateRes.error) {
+        setProgress(ProgressStatus.Error);
+        setLog((log) => [...log, "ERROR: " + generateRes.error]);
+      } else {
+        setProgress(ProgressStatus.Done);
+        setLog((log) => [...log, "DONE"]);
+      }
+    }
   }
 
   return (
@@ -107,12 +146,18 @@ export default function Form() {
               className="btn"
               disabled={!isValidRepo(repo)}
               onClick={() => {
-                console.log(token);
+                start();
               }}
             >
               Generate PDF
             </button>
           </div>
+        </div>
+      )}
+      {progress !== ProgressStatus.None && (
+        <div className="flex flex-col gap-2 rounded-md border p-4 mt-2">
+          <h1 className="text-teal-500">{">"} LOG:</h1>
+          <pre className="text-sm">{log.join("\n")}</pre>
         </div>
       )}
     </div>
