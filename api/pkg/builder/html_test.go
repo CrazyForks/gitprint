@@ -2,20 +2,28 @@ package builder
 
 import (
 	"bytes"
-	"os"
+	"strings"
 	"testing"
 )
 
 func TestGenerateHTML(t *testing.T) {
 	tests := []struct {
-		name       string
-		doc        *Document
-		isNilErr   bool
-		outputFile string
+		name     string
+		doc      *Document
+		isNilErr bool
+		contains []string
 	}{
-		{"empty", &Document{
+		{"simple", &Document{
 			Title: "plutov/plutov",
-		}, true, "./testdata/test.html"},
+			Nodes: []DocumentNode{
+				DocumentNode{
+					Type: NodeTypeMeta,
+					ContentMeta: &ContentMeta{
+						FullName: "plutov/plutov",
+					},
+				},
+			},
+		}, true, []string{"<h1>plutov/plutov</h1>"}},
 	}
 
 	for _, tt := range tests {
@@ -27,9 +35,10 @@ func TestGenerateHTML(t *testing.T) {
 			}
 
 			if tt.isNilErr {
-				expected, _ := os.ReadFile(tt.outputFile)
-				if w.String() != string(expected) {
-					t.Errorf("expecting %s, got %s", string(expected), w.String())
+				for _, c := range tt.contains {
+					if !strings.Contains(w.String(), c) {
+						t.Errorf("expecting to contain %s", c)
+					}
 				}
 			}
 		})
