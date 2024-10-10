@@ -39,17 +39,20 @@ export default function RootLayout({
         <footer className="flex w-full items-center justify-center border-t">
           <div className="flex justify-center p-4 text-sm">
             <span className="mx-2">v0.1.0</span>
-            <span className="mx-2">•</span>
+            <span>•</span>
             <span className="mx-2">
               Made by{" "}
               <a rel="nofollow" href="https://x.com/pliutau">
                 @pliutau
               </a>
             </span>
-            <span className="mx-2">•</span>
-            <a rel="nofollow" href="/docs">
-              How it works
-            </a>
+            <span>•</span>
+            <span className="mx-2">
+              {" "}
+              <a rel="nofollow" href="/docs">
+                How it works
+              </a>
+            </span>
           </div>
         </footer>
       </body>

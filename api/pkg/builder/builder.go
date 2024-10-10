@@ -66,6 +66,8 @@ func GenerateDocument(repo *github.Repository, contributors []*github.Contributo
 	logCtx := log.With("repo", repo.GetFullName(), "outputDir", outputDir)
 	logCtx.Info("generating document")
 
+	defer os.RemoveAll(outputDir)
+
 	doc := &Document{
 		Title: repo.GetFullName(),
 		Nodes: []DocumentNode{},
