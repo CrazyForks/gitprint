@@ -5,6 +5,7 @@
 - Testing
 - CI/CD
 - Monitoring / healthchecks
+- Automate repositories of the day
 
 ## Additional information
 

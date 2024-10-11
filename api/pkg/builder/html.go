@@ -5,6 +5,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
+
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/plutov/gitprint/api/pkg/files"
 	"github.com/plutov/gitprint/api/pkg/log"
@@ -20,6 +26,15 @@ func GenerateHTML(w io.Writer, doc *Document, exportID string) error {
 		return err
 	}
 
+	// markdown to html
+	for i, node := range doc.Nodes {
+		if node.Type == NodeTypeFile && strings.HasSuffix(strings.ToLower(node.Title), ".md") {
+			doc.Nodes[i].ContentFile.ContentHTML = template.HTML(MarkdownToHTML(node.ContentFile.Content))
+			doc.Nodes[i].ContentFile.Content = ""
+			doc.Nodes[i].ContentFile.IsMarkdown = true
+		}
+	}
+
 	if err := t.Execute(w, doc); err != nil {
 		logCtx.WithError(err).Error("failed to execute template")
 		return err
@@ -27,6 +42,22 @@ func GenerateHTML(w io.Writer, doc *Document, exportID string) error {
 
 	logCtx.Info("html generated")
 	return nil
+}
+
+func MarkdownToHTML(content string) string {
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+	doc := p.Parse([]byte(content))
+
+	// create HTML renderer with extensions
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	unsafeHTML := string(markdown.Render(doc, renderer))
+
+	// sanitize HTML
+	return bluemonday.UGCPolicy().Sanitize(unsafeHTML)
 }
 
 func GenerateAndSaveHTMLFile(doc *Document, exportID string) (string, error) {

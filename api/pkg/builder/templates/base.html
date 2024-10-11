@@ -21,6 +21,21 @@
             .section.code > pre {
                 @apply text-ellipsis text-pretty text-xs overflow-hidden;
             }
+            .section.code .markdown {
+                @apply text-ellipsis text-pretty text-xs overflow-hidden;
+            }
+            .section.code .markdown img {
+                @apply hidden;
+            }
+            .section.code .markdown li {
+                @apply list-disc list-inside;
+            }
+            .section.code .markdown p {
+                @apply py-2;
+            }
+            .section.code .markdown h1, .section.code .markdown h2, .section.code .markdown h3, .section.code .markdown h4 {
+                @apply font-semibold py-2;
+            }
             .section > h1 {
                 @apply text-lg font-semibold;
             }
@@ -72,7 +87,13 @@
                 {{ end }}
                 {{if $n.Type | eq "file"}}
                 <h1>{{ $n.Title }}</h1>
+                {{if $n.ContentFile.IsMarkdown}}
+                <div class="markdown">
+                {{ $n.ContentFile.ContentHTML }}
+                </div>
+                {{ else }}
                 <pre>{{ $n.ContentFile.Content }}}</pre>
+                {{ end }}
                 {{ end }}
             </div>
             {{ end }}

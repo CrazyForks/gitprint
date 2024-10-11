@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"html/template"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -44,7 +45,9 @@ type ContentChapter struct {
 }
 
 type ContentFile struct {
-	Content string `json:"content"`
+	IsMarkdown  bool          `json:"isMarkdown"`
+	Content     string        `json:"content"`
+	ContentHTML template.HTML `json:"contentHTML"`
 }
 
 type DocumentNode struct {

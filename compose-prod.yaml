@@ -6,7 +6,7 @@ services:
     ports:
       - "9701:8080"
     environment:
-      - ENV=local
+      - ENV=prod
       - LOG_LEVEL=debug
       - JWT_SECRET=42_bullseye_24_grog
       - GITHUB_CLIENT_ID=Ov23liZEEiOWoR3XtAnt
