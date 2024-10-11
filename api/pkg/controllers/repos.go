@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/plutov/gitprint/api/pkg/builder"
@@ -65,6 +67,8 @@ func (h *Handler) downloadRepo(c echo.Context) error {
 		return response.InternalError(c, "unable to extract and filter files")
 	}
 
+	h.Stats.SaveStats(fmt.Sprintf("download_repo:%s/%s,timestamp:%d", owner, repo, time.Now().UTC().Unix()))
+
 	return response.Ok(c, extracted)
 }
 
@@ -124,6 +128,8 @@ func (h *Handler) generate(c echo.Context) error {
 	if os.Getenv("ENV") != "local" {
 		h.Services.GenerateRateLimiter.Put(user.Username)
 	}
+
+	h.Stats.SaveStats(fmt.Sprintf("generate_repo:%s/%s,timestamp:%d", owner, repo, time.Now().UTC().Unix()))
 
 	return response.Ok(c, "ok")
 }

@@ -34,7 +34,7 @@ export default function Home() {
       <div className="pb-10">
         <div className="mx-auto max-w-2xl px-4">
           <div className="flex flex-col text-center pb-4">
-            <h1 className="text-lg font-semibold">Repositories of the day</h1>
+            <h2 className="text-lg font-semibold">Repositories of the day</h2>
             <span className="text-sm text-gray-400">
               Click to download the PDF
             </span>

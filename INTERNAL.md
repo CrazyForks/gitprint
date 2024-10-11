@@ -2,7 +2,6 @@
 
 ## TODO
 
-- top examples to download: Neovim... on CDN
 - Testing
 - CI/CD
 - Monitoring / healthchecks

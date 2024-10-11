@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/plutov/gitprint/api/pkg/auth"
@@ -35,6 +37,8 @@ func (h *Handler) githubCallback(c echo.Context) error {
 		log.WithError(err).Error("failed to fill jwt token")
 		return response.InternalError(c, "unable to create a session")
 	}
+
+	go h.Stats.SaveStats(fmt.Sprintf("user:%s,timestamp:%d", user.Username, time.Now().UTC().Unix()))
 
 	return response.Ok(c, echo.Map{
 		"jwt_token": jwtToken,

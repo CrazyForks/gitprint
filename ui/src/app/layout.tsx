@@ -3,12 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://gitprint.me"),
-  title: "gitprint.me",
+  title: "Git Print",
   description: "Print your favorite Git repositories as PDF",
   openGraph: {
     type: "website",
     locale: "en_US",
-    title: "gitprint.me",
+    title: "Git Print",
     description: "Print your favorite Git repositories as PDF",
     siteName: "gitprint.me",
     images: [
@@ -31,7 +31,7 @@ export default function RootLayout({
     <html lang="en" className="dark">
       <body className="flex flex-col h-screen justify-between">
         <header className="flex h-16 w-full items-center justify-center border-b">
-          <a rel="nofollow" href="/" className="font-bold p-8">
+          <a href="/" className="font-bold p-8">
             gitprint.me - Print your favorite Git repositories as PDF.
           </a>
         </header>
@@ -49,9 +49,7 @@ export default function RootLayout({
             <span>•</span>
             <span className="mx-2">
               {" "}
-              <a rel="nofollow" href="/docs">
-                How it works
-              </a>
+              <a href="/docs">How it works</a>
             </span>
           </div>
         </footer>

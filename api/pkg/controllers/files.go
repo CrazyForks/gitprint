@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/plutov/gitprint/api/pkg/files"
@@ -23,6 +24,7 @@ func (h *Handler) downloadExportFile(c echo.Context) error {
 		return c.File(path)
 	case "pdf":
 		path = files.GetExportPDFFile(exportID)
+		go h.Stats.SaveStats(fmt.Sprintf("download:%s,ext:%s,timestamp:%d", exportID, ext, time.Now().UTC().Unix()))
 		return c.Attachment(path, fmt.Sprintf("%s.pdf", exportID))
 	default:
 		return response.BadRequest(c, "invalid ext")
