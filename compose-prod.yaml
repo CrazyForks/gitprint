@@ -8,9 +8,9 @@ services:
     environment:
       - ENV=prod
       - LOG_LEVEL=debug
-      - JWT_SECRET=42_bullseye_24_grog
-      - GITHUB_CLIENT_ID=Ov23liZEEiOWoR3XtAnt
-      - GITHUB_CLIENT_SECRET=ff17f795e218054e8e42bd538566bdf0e181aab9
+      - JWT_SECRET=${JWT_SECRET}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
       - GITHUB_REPOS_DIR=/root/repos
       - GOTENBERG_ADDR=http://gotenberg:3000
     volumes:
@@ -22,6 +22,7 @@ services:
       context: ./ui
       args:
         - NEXT_PUBLIC_API_ADDR=https://api.gitprint.me
+        - NODE_ENV=production
     ports:
       - "9702:3000"
 

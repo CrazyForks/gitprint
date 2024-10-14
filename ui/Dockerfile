@@ -7,17 +7,20 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 
-ENV NODE_ENV=production
-# NEXT_PUBLIC_API_ADDR is passed as build arg
 ARG NEXT_PUBLIC_API_ADDR
+ARG NODE_ENV
+
+ENV NODE_ENV=${NODE_ENV}
 ENV NEXT_PUBLIC_API_ADDR=${NEXT_PUBLIC_API_ADDR}
+
 RUN npm run build
 
 FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-ENV NODE_ENV=production
+# ARG NODE_ENV
+# ENV NODE_ENV=${NODE_ENV}
 
 RUN mkdir .next
 
