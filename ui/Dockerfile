@@ -19,9 +19,6 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-# ARG NODE_ENV
-# ENV NODE_ENV=${NODE_ENV}
-
 RUN mkdir .next
 
 COPY --from=builder /app/.next/standalone ./

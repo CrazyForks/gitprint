@@ -1,0 +1,20 @@
+service: gitprint-web
+image: pliutau/gitprint-web
+servers:
+  web:
+    - 195.201.121.112
+proxy:
+  ssl: true
+  host: gitprint.me
+  app_port: 3000
+  healthcheck:
+    path: /
+registry:
+  username: pliutau
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+builder:
+  arch: amd64
+  args:
+    NEXT_PUBLIC_API_ADDR: https://api.gitprint.me
+    NODE_ENV: production
