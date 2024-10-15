@@ -33,7 +33,7 @@ func NewRouter(h *Handler) *echo.Echo {
 }
 
 func (h *Handler) healthCheckHandler(c echo.Context) error {
-	return c.JSON(http.StatusOK, nil)
+	return c.JSON(http.StatusOK, "healthy")
 }
 
 func (h *Handler) authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
