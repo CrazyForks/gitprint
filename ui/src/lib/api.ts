@@ -102,3 +102,7 @@ export async function generate(
     jwt,
   );
 }
+
+export async function getRecentRepos() {
+  return await get("/repos/recent");
+}

@@ -130,7 +130,7 @@ func (h *Handler) generate(c echo.Context) error {
 		h.Services.GenerateRateLimiter.Put(user.Username)
 	}
 
-	h.Stats.SaveStats(fmt.Sprintf("generate_repo:%s/%s,timestamp:%d", owner, repo, time.Now().UTC().Unix()))
+	h.Stats.SaveStats(fmt.Sprintf("generate_repo:%s/%s,export_id:%s,ref:%s,timestamp:%d", owner, repo, exportID, req.Ref, time.Now().UTC().Unix()))
 
 	return response.Ok(c, "ok")
 }
