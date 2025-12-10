@@ -2,9 +2,9 @@
 
 import { getJWT } from "../../lib/api";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function Callback() {
+function CallbackContent() {
   const searchParams = useSearchParams();
 
   const code = searchParams.get("code") as string;
@@ -46,5 +46,13 @@ export default function Callback() {
         <div className="h-px w-full"></div>
       </div>
     </div>
+  );
+}
+
+export default function Callback() {
+  return (
+    <Suspense fallback={<div className="pt-20 text-center">Loading...</div>}>
+      <CallbackContent />
+    </Suspense>
   );
 }
