@@ -30,6 +30,7 @@ export default function Docs() {
           </div>
           <div className="flex flex-col gap-2 rounded-md border p-8 mt-4">
             <h1 className="text-lg font-semibold">{">"} CHANGELOG</h1>
+            <p>2025-12-10: Upgrade JS packages.</p>
             <p>2024-10-11: Parse Markdown files.</p>
             <p>2024-10-11: Add exclude patterns.</p>
           </div>
